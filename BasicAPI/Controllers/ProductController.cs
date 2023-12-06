@@ -13,9 +13,9 @@ namespace BasicAPI.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IProductRepository _repository;
+        private readonly IGenericRepository<Product> _repository;
 
-        public ProductController(IMapper mapper, IProductRepository repository)
+        public ProductController(IMapper mapper, IGenericRepository<Product> repository)
         {
             _mapper = mapper;
             _repository = repository;
@@ -72,7 +72,7 @@ namespace BasicAPI.Controllers
             try
             {
                 // Llamamos al metodo GetById de nuestro repositorio que busca un producto coincida con el Id que le pasamos
-                Product? product = _repository.GetById(id);
+                Product? product = _repository.GetOne(x => x.Id == id);
 
                 // Verificamos que si el producto es NULL (significa que no se encontro en nuestra DB) y manejamos el error
                 if (product == null)
@@ -145,7 +145,7 @@ namespace BasicAPI.Controllers
             try
             {
                 // Buscamos en nuestra DB un producto que coincida con el Id recibido y lo almacenamos en una variable
-                Product? product = _repository.GetById(id);
+                Product? product = _repository.GetOne(x => x.Id == id);
 
                 // Verificamos que si el producto es NULL (significa que no se encontro en nuestra DB) y manejamos el error
                 if (product == null)
@@ -188,7 +188,7 @@ namespace BasicAPI.Controllers
             try
             {
                 // Buscamos en nuestra DB un producto que coincida con el Id recibido y lo almacenamos en una variable
-                Product? product = _repository.GetById(id);
+                Product? product = _repository.GetOne(x => x.Id == id);
 
                 // Verificamos que si el producto es NULL (significa que no se encontro en nuestra DB) y manejamos el error
                 if (product == null)
