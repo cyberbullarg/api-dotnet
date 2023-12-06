@@ -1,6 +1,8 @@
+using BasicAPI.Context.Persistence;
+using BasicAPI.Interfaces;
+using BasicAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using BasicAPI.Context.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,9 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
+
+// Repositories
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

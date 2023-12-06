@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
-using BasicAPI.Context.Persistence;
+using BasicAPI.Interfaces;
 using BasicAPI.Model.Entities;
 using BasicAPI.Model.Request;
 using BasicAPI.Model.Response;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Serilog;
 
 namespace BasicAPI.Controllers
@@ -15,12 +13,12 @@ namespace BasicAPI.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly ApplicationContext _context;
+        private readonly IProductRepository _repository;
 
-        public ProductController(IMapper mapper, ApplicationContext context)
+        public ProductController(IMapper mapper, IProductRepository repository)
         {
             _mapper = mapper;
-            _context = context;
+            _repository = repository;
         }
 
         [HttpGet] // http://localhost:7081/product/
@@ -28,8 +26,8 @@ namespace BasicAPI.Controllers
         {
             try
             {
-                // Buscamos TODOS nuestros productos en la DB y los almacenamos en una coleccion
-                IEnumerable<Product> products = _context.Products.ToList();
+                // Llamamos al metodo GetAll de nuestro repositorio que nos trae TODOS nuestros productos y los almacenamos en una coleccion
+                IEnumerable<Product> products = _repository.GetAll();
 
                 // Validamos que la coleccion contenga al menos 1 producto
                 if (!products.Any())
@@ -73,8 +71,8 @@ namespace BasicAPI.Controllers
 
             try
             {
-                // Buscamos en nuestra DB un producto que coincida con el Id recibido y lo almacenamos en una variable
-                Product? product = _context.Products.Where(x => x.Id == id).FirstOrDefault();
+                // Llamamos al metodo GetById de nuestro repositorio que busca un producto coincida con el Id que le pasamos
+                Product? product = _repository.GetById(id);
 
                 // Verificamos que si el producto es NULL (significa que no se encontro en nuestra DB) y manejamos el error
                 if (product == null)
@@ -115,20 +113,17 @@ namespace BasicAPI.Controllers
                     CreatedAt = DateTime.Now
                 };
 
-                // Hacemos el llamado al metodo Add de EF y le pasamos nuestro objeto producto
-                EntityEntry result = _context.Products.Add(product);
+                // Hacemos el llamado al metodo Create de nuestro repositorio y le pasamos nuestro objeto producto
+                bool result = _repository.Create(product);
 
-                // Verificamos el estado de la operacion, si no es Added, significa que ocurrio un problema y lo manejamos
-                if (result.State != EntityState.Added)
+                // Verificamos el resultado, si es false significa que ocurrio un problema y debemos manejarlo
+                if (!result)
                 {
                     return BadRequest("Ocurrio un problema al crear el producto");
                 }
 
-                // En este punto, si el estado de la operacion es el correcto, debemos guardar los cambios
-                _context.SaveChanges();
-
-                // Finalmente retornamos nuestro producto
-                return StatusCode(201, result.Entity);
+                // Finalmente en este punto, si el estado de la operacion es el correcto podemos buscar y retornar nuestro producto
+                return CreatedAtAction(nameof(GetOne), new { Id = product.Id }, product);
             }
             catch (Exception e)
             {
@@ -139,7 +134,7 @@ namespace BasicAPI.Controllers
         }
 
         [HttpPut("{id}")] // http://localhost:7081/product/{id}
-        public IActionResult Update(Guid id, UpdateProductRequest req)
+        public IActionResult Update(Guid id, [FromBody] UpdateProductRequest req)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -150,7 +145,7 @@ namespace BasicAPI.Controllers
             try
             {
                 // Buscamos en nuestra DB un producto que coincida con el Id recibido y lo almacenamos en una variable
-                Product? product = _context.Products.FirstOrDefault(x => x.Id == id);
+                Product? product = _repository.GetById(id);
 
                 // Verificamos que si el producto es NULL (significa que no se encontro en nuestra DB) y manejamos el error
                 if (product == null)
@@ -162,17 +157,14 @@ namespace BasicAPI.Controllers
                 product.Name = req.Name;
                 product.Price = req.Price;
 
-                // Hacemos el llamado al metodo Update de EF y le pasamos el producto con los nuevos valores
-                EntityEntry result = _context.Products.Update(product);
+                // Hacemos el llamado al metodo Update de nuestro repositorio y le pasamos el producto con los nuevos valores
+                bool result = _repository.Update(product);
 
-                // Verificamos el estado de la operacion, si no es Modified, significa que ocurrio un problema y lo manejamos
-                if (result.State != EntityState.Modified)
+                // Verificamos el resultado, si es false significa que ocurrio un problema y debemos manejarlo
+                if (!result)
                 {
                     return BadRequest("Ocurrio un problema al actualizar el producto");
                 }
-
-                // En este punto, si el estado de la operacion es el correcto, debemos guardar los cambios
-                _context.SaveChanges();
 
                 // Igualamos cada una de las propiedades de nuestro objeto de respuesta con las de nuestro producto
                 response.Id = product.Id;
@@ -196,7 +188,7 @@ namespace BasicAPI.Controllers
             try
             {
                 // Buscamos en nuestra DB un producto que coincida con el Id recibido y lo almacenamos en una variable
-                Product? product = _context.Products.FirstOrDefault(x => x.Id == id);
+                Product? product = _repository.GetById(id);
 
                 // Verificamos que si el producto es NULL (significa que no se encontro en nuestra DB) y manejamos el error
                 if (product == null)
@@ -204,19 +196,16 @@ namespace BasicAPI.Controllers
                     return NotFound($"El producto con Id: {id} no fue encontrado");
                 }
 
-                // En este punto el producto fue encontrado y podemos eliminarlo llamando al metodo Remove de EF y almacenamos el resultado
-                EntityEntry result = _context.Products.Remove(product);
+                // En este punto el producto fue encontrado y podemos eliminarlo llamando al metodo Delete de nuestro repositorio
+                bool result = _repository.Delete(product);
 
-                // Verificamos el estado de la operacion, si no es Deleted, significa que ocurrio un problema y lo manejamos
-                if (result.State != EntityState.Deleted)
+                // Verificamos el resultado, si es false significa que ocurrio un problema y debemos manejarlo
+                if (!result)
                 {
                     return BadRequest("Ocurrio un problema al eliminar el producto");
                 }
 
-                // En este punto, si el estado de la operacion es el correcto, debemos guardar los cambios
-                _context.SaveChanges();
-
-                // Finalmente retornamos un boolean indicando el exito de la operacion
+                // Finalmente retornamos true indicando el exito de la operacion
                 return Ok(true);
             }
             catch (Exception e)
