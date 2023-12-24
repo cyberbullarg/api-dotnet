@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using BasicAPI.Shared;
+using System.Linq.Expressions;
 
 namespace BasicAPI.Interfaces
 {
@@ -6,8 +7,8 @@ namespace BasicAPI.Interfaces
     {
         IEnumerable<T> GetAll();
         T? GetOne(Expression<Func<T, bool>> predicate);
-        bool Create(T entity);
-        bool Update(T entity);
-        bool Delete(T entity);
+        Result Create(T entity);
+        Result Update(T entity);
+        Result Delete(T entity);
     }
 }

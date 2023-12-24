@@ -1,5 +1,6 @@
 ﻿using BasicAPI.Context.Persistence;
 using BasicAPI.Interfaces;
+using BasicAPI.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Linq.Expressions;
@@ -35,7 +36,7 @@ namespace BasicAPI.Repositories
             return EntitySet.AsNoTracking().FirstOrDefault(expression);
         }
 
-        public bool Create(T entity)
+        public Result Create(T entity)
         {
             // Hacemos el llamado al metodo Add de EF y le pasamos la entidad a crear
             EntityEntry result = EntitySet.Add(entity);
@@ -43,17 +44,17 @@ namespace BasicAPI.Repositories
             // Verificamos el estado de la operacion, si no es Added, significa que ocurrio un problema y lo manejamos
             if (result.State != EntityState.Added)
             {
-                return false;
+                return Result.Failure(new("An error occurred while trying to create a product"));
             }
 
             // En este punto, si el estado de la operacion es el correcto, debemos guardar los cambios
             SaveChanges();
 
-            // Finalmente retornamos true, indicando que se creo correctamente la entidad
-            return true;
+            // Finalmente retornamos nuestro metodo Success, indicando que se creo correctamente la entidad
+            return Result.Success();
         }
 
-        public bool Update(T entity)
+        public Result Update(T entity)
         {
             // Hacemos el llamado al metodo Update de EF y le pasamos la entidad con sus campos actualizados
             EntityEntry result = EntitySet.Update(entity);
@@ -61,17 +62,17 @@ namespace BasicAPI.Repositories
             // Verificamos el estado de la operacion, si no es Modified, significa que ocurrio un problema y lo manejamos
             if (result.State != EntityState.Modified)
             {
-                return false;
+                return Result.Failure(new("An error occurred while trying to update a product"));
             }
 
             // En este punto, si el estado de la operacion es el correcto, debemos guardar los cambios
             SaveChanges();
 
-            // Finalmente retornamos true, indicando que se actualizo correctamente la entidad
-            return true;
+            // Finalmente retornamos nuestro metodo Success, indicando que se actualizo correctamente la entidad
+            return Result.Success();
         }
 
-        public bool Delete(T entity)
+        public Result Delete(T entity)
         {
             // Llamando al metodo Remove de EF pasandole la entidad a eliminar y almacenamos el resultado
             EntityEntry result = EntitySet.Remove(entity);
@@ -79,14 +80,14 @@ namespace BasicAPI.Repositories
             // Verificamos el estado de la operacion, si no es Deleted, significa que ocurrio un problema y lo manejamos
             if (result.State != EntityState.Deleted)
             {
-                return false;
+                return Result.Failure(new("An error occurred while trying to delete a product"));
             }
 
             // En este punto, si el estado de la operacion es el correcto, debemos guardar los cambios
             SaveChanges();
 
-            // Finalmente retornamos true, indicando que se elimino correctamente la entidad
-            return true;
+            // Finalmente retornamos nuestro metodo Success, indicando que se elimino correctamente la entidad
+            return Result.Success();
         }
 
         private void SaveChanges() => _context.SaveChanges();
