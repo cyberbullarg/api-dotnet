@@ -3,12 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BasicAPI.Context.Persistence
 {
-    public class ApplicationContext : DbContext
+    public class ApplicationContext(DbContextOptions<ApplicationContext> options) : DbContext(options)
     {
         public DbSet<Product> Products { get; set; }
-
-        public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
-        {
-        }
+        public DbSet<Category> Categories { get; set; }
     }
 }

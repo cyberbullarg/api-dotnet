@@ -2,11 +2,11 @@
 
 namespace BasicAPI.Model.Response
 {
-    public class ProductResponse
+    public class CategoryResponse
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public float Price { get; set; }
-        public Category Category { get; set; }
+        public string Description { get; set; }
+        public ICollection<Product> Products { get; set; }
     }
 }

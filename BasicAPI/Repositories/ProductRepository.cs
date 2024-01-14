@@ -18,13 +18,13 @@ namespace BasicAPI.Repositories
         public IEnumerable<Product> GetAll()
         {
             // Buscamos en nuestra DB todos los productos existentes
-            return _context.Products.ToList();
+            return _context.Products.Include(x => x.Category).ToList();
         }
 
         public Product? GetById(Guid id)
         {
             // Buscamos en nuestra DB el primer producto que coincida con el Id que recibimos
-            return _context.Products.FirstOrDefault(x => x.Id == id);
+            return _context.Products.Include(x => x.Category).FirstOrDefault(x => x.Id == id);
         }
 
         public bool Create(Product product)

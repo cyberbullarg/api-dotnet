@@ -48,7 +48,8 @@ namespace BasicAPI.Controllers
                     {
                         Id = item.Id,
                         Name = item.Name,
-                        Price = item.Price
+                        Price = item.Price,
+                        Category = item.Category,
                     });
                 }
 
@@ -84,6 +85,7 @@ namespace BasicAPI.Controllers
                 response.Id = product.Id;
                 response.Name = product.Name;
                 response.Price = product.Price;
+                response.Category = product.Category;
 
                 // Finalmente retornamos nuestro objeto custom con los valores de nuestro producto
                 return Ok(response);
@@ -110,7 +112,8 @@ namespace BasicAPI.Controllers
                     Id = Guid.NewGuid(),
                     Name = req.Name,            // Otorgado por el usuario
                     Price = req.Price,          // Otorgado por el usuario
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    CategoryId = req.CategoryId // Id de la Categoria a la que pertenece el Producto
                 };
 
                 // Hacemos el llamado al metodo Create de nuestro repositorio y le pasamos nuestro objeto producto
