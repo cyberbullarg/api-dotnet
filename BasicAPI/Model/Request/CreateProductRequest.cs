@@ -1,8 +1,4 @@
 ﻿namespace BasicAPI.Model.Request
 {
-    public class CreateProductRequest
-    {
-        public string Name { get; set; }
-        public float Price { get; set; }
-    }
+    public record CreateProductRequest(string Name, float Price);
 }

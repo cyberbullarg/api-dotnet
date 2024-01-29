@@ -44,12 +44,7 @@ namespace BasicAPI.Controllers
                 // Iteramos nuestra coleccion de productos para agregar cada uno de sus elementos (producto) a nuestra nueva lista de respuesta custom
                 foreach (var item in products)
                 {
-                    response.Add(new ProductResponse
-                    {
-                        Id = item.Id,
-                        Name = item.Name,
-                        Price = item.Price
-                    });
+                    response.Add(new ProductResponse(item.Id, item.Name, item.Price));
                 }
 
                 // Finalmente retornamos nuestro objeto custom que contiene nuestros productos
@@ -66,9 +61,6 @@ namespace BasicAPI.Controllers
         [HttpGet("{id}")] // http://localhost:7081/product/{id}
         public IActionResult GetOne(Guid id)
         {
-            // Creamos una instancia de nuestro objeto de respuesta custom
-            ProductResponse response = new();
-
             try
             {
                 // Llamamos al metodo GetById de nuestro repositorio que busca un producto coincida con el Id que le pasamos
@@ -80,10 +72,8 @@ namespace BasicAPI.Controllers
                     return NotFound($"El producto Id: {id} no fue encontrado");
                 }
 
-                // Igualamos cada una de las propiedades de nuestro objeto de respuesta con las de nuestro producto
-                response.Id = product.Id;
-                response.Name = product.Name;
-                response.Price = product.Price;
+                // Creamos nuestro objeto de respuesta custom
+                ProductResponse response = new(product.Id, product.Name, product.Price);
 
                 // Finalmente retornamos nuestro objeto custom con los valores de nuestro producto
                 return Ok(response);
@@ -139,9 +129,6 @@ namespace BasicAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Creamos una instancia de nuestro objeto de respuesta custom
-            ProductResponse response = new();
-
             try
             {
                 // Buscamos en nuestra DB un producto que coincida con el Id recibido y lo almacenamos en una variable
@@ -166,10 +153,8 @@ namespace BasicAPI.Controllers
                     return BadRequest("Ocurrio un problema al actualizar el producto");
                 }
 
-                // Igualamos cada una de las propiedades de nuestro objeto de respuesta con las de nuestro producto
-                response.Id = product.Id;
-                response.Name = product.Name;
-                response.Price = product.Price;
+                // Creamos nuestro objeto de respuesta custom
+                ProductResponse response = new(product.Id, product.Name, product.Price);
 
                 // Finalmente retornamos nuestro objeto custom con los valores de nuestro producto
                 return Ok(response);
